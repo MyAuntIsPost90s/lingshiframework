@@ -25,9 +25,9 @@ public class LingShiTokenAndUserPool {
 		@Override
 		public void run() {
 			try {
-				//每隔30分钟清除过期token
+				//每隔2小时分钟清除过期token
 				while(true){
-					Thread.sleep(1000*60*30);
+					Thread.sleep(1000*60*60*2);
 					if(tokenandusers==null)
 						return;
 					
