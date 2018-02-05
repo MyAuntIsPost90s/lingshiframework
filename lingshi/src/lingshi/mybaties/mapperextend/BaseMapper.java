@@ -18,5 +18,5 @@ public interface BaseMapper<T> {
 
 	public T getSingle(Object id);
 
-	public <K> int batchDelete(List<K> id);
+	public <K> int batchDelete(List<K> ids);
 }
