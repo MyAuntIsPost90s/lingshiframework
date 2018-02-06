@@ -10,11 +10,13 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
 import com.alibaba.fastjson.JSON;
 
+import lingshi.convert.Convert;
 import lingshi.valid.StringValid;
 import lingshi.web.model.LingShiTokenAndUserPool;
 import lingshi.web.model.LingShiTokenCode;
@@ -23,6 +25,7 @@ import lingshi.web.model.ResponseData;
 
 public class TokenCheckFilter implements javax.servlet.Filter {
 	private List<String> allowpath;
+	private Boolean iscross;
 
 	@Override
 	public void destroy() {
@@ -34,6 +37,26 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		HttpServletRequest hRequest = (HttpServletRequest) request;
+		HttpServletResponse hResponse = (HttpServletResponse) response;
+
+		//当开启跨域时
+		if(iscross==true){
+			hResponse.setHeader("Access-Control-Allow-Origin", "*");
+
+			hResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+			hResponse.setHeader("Access-Control-Max-Age", "0");
+			hResponse.setHeader("Access-Control-Allow-Headers",
+					"Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With,AppKey,AccessToken");
+			hResponse.setHeader("Access-Control-Allow-Credentials", "true");
+			hResponse.setHeader("XDomainRequestAllowed", "1");
+			
+			//过滤试探请求
+			if(hRequest.getMethod().toUpperCase().equals("OPTIONS")){
+				chain.doFilter(request, response);
+				return;
+			}
+		}
+
 		// 跳过校验
 		if (allowpath != null) {
 			for (String item : allowpath) {
@@ -81,5 +104,10 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 		String[] strs = filterConfig.getInitParameter("allowpath").split(",");
 		this.allowpath = Arrays.asList(strs);
 		Logger.getRootLogger().info("Load allowpath:" + allowpath.toString());
+		
+		//是否开启跨域
+		String crossStr=filterConfig.getInitParameter("iscross");
+		iscross=Convert.toBoolean(crossStr);
+		Logger.getRootLogger().info("Load iscross:" + iscross);
 	}
 }

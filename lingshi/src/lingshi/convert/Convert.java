@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 public class Convert {
 	public static int toInt(String str) {
 		return Integer.parseInt(str);
@@ -57,5 +59,15 @@ public class Convert {
 
 	public static Date toDate(long num) {
 		return new Date(num);
+	}
+	
+	public static Boolean toBoolean(String bool){
+		Boolean result=null;
+		try{
+			result = Boolean.parseBoolean(bool);
+		}catch (Exception e) {
+			Logger.getRootLogger().info("error for toBoolean:"+e);
+		}
+		return result;
 	}
 }
