@@ -39,9 +39,9 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 		HttpServletRequest hRequest = (HttpServletRequest) request;
 		HttpServletResponse hResponse = (HttpServletResponse) response;
 
-		//当开启跨域时
-		if(iscross==true){
-			hResponse.setHeader("Access-Control-Allow-Origin", "*");
+		// 当开启跨域时
+		if (iscross == true) {
+			hResponse.setHeader("Access-Control-Allow-Origin", hRequest.getHeader("Origin"));
 
 			hResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
 			hResponse.setHeader("Access-Control-Max-Age", "0");
@@ -49,9 +49,9 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 					"Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With,AppKey,AccessToken");
 			hResponse.setHeader("Access-Control-Allow-Credentials", "true");
 			hResponse.setHeader("XDomainRequestAllowed", "1");
-			
-			//过滤试探请求
-			if(hRequest.getMethod().toUpperCase().equals("OPTIONS")){
+
+			// 过滤试探请求
+			if (hRequest.getMethod().toUpperCase().equals("OPTIONS")) {
 				chain.doFilter(request, response);
 				return;
 			}
@@ -104,10 +104,10 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 		String[] strs = filterConfig.getInitParameter("allowpath").split(",");
 		this.allowpath = Arrays.asList(strs);
 		Logger.getRootLogger().info("Load allowpath:" + allowpath.toString());
-		
-		//是否开启跨域
-		String crossStr=filterConfig.getInitParameter("iscross");
-		iscross=Convert.toBoolean(crossStr);
+
+		// 是否开启跨域
+		String crossStr = filterConfig.getInitParameter("iscross");
+		iscross = Convert.toBoolean(crossStr);
 		Logger.getRootLogger().info("Load iscross:" + iscross);
 	}
 }
