@@ -101,6 +101,7 @@ public class LingShiTokenAndUserPool {
 					calendar.setTime(new Date()); 
 					calendar.add(Calendar.HOUR,2);
 					map.get(key).setExp(calendar.getTime());
+					map.get(key).setData(user);
 					
 					lock.unlock();
 					return map.get(key);
