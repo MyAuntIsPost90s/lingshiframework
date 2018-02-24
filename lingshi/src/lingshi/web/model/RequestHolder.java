@@ -199,7 +199,7 @@ public class RequestHolder {
 	 * @return
 	 */
 	public String getRealPathPath(String path) {
-		if (path != null && path.substring(0, 1).equals("/")) {
+		if (path != null && path.length() > 0 && path.substring(0, 1).equals("/")) {
 			path = path.substring(1);
 		}
 		return this.request.getServletContext().getRealPath("/") + path;
