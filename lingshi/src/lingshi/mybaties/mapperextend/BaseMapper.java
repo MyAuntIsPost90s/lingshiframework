@@ -6,17 +6,17 @@ import com.github.miemiedev.mybatis.paginator.domain.PageBounds;
 import com.github.miemiedev.mybatis.paginator.domain.PageList;
 
 public interface BaseMapper<T> {
-	public int insert(T t);
+	int insert(T t);
 
-	public int update(T t);
+	int update(T t);
 
-	public long count(T t);
+	long count(T t);
 
-	public PageList<T> getListWithPage(T t, PageBounds pageBounds);
+	PageList<T> getListWithPage(T t, PageBounds pageBounds);
 
-	public List<T> getList(T t);
+	List<T> getList(T t);
 
-	public T getSingle(Object id);
+	T getSingle(Object id);
 
-	public <K> int batchDelete(List<K> ids);
+	<K> int batchDelete(List<K> ids);
 }

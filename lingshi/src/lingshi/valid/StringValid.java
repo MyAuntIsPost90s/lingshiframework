@@ -8,19 +8,23 @@ public class StringValid {
 	 * @return
 	 */
 	public static boolean isNullOrEmpty(String str) {
-		if (str == null)
+		if (str == null) {
 			return true;
-		if (str.isEmpty())
+		}
+		if (str.isEmpty()) {
 			return true;
+		}
 		return false;
 	}
 
 	public static boolean isNullOrWhiteSpace(String str) {
-		if (str == null)
+		if (str == null) {
 			return true;
+		}
 		str = str.trim();
-		if (str.isEmpty())
+		if (str.isEmpty()) {
 			return true;
+		}
 		return false;
 	}
 }

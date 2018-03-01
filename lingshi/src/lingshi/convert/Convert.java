@@ -20,8 +20,9 @@ public class Convert {
 
 	public static List<Integer> toInts(List<String> strs) {
 		List<Integer> intList = new ArrayList<>();
-		if (strs == null || strs.size() < 1)
+		if (strs == null || strs.size() < 1) {
 			return intList;
+		}
 
 		for (String item : strs) {
 			intList.add(toInt(item));
@@ -37,8 +38,9 @@ public class Convert {
 
 	public static List<Long> toLongs(List<String> strs) {
 		List<Long> intList = new ArrayList<>();
-		if (strs == null || strs.size() < 1)
+		if (strs == null || strs.size() < 1) {
 			return intList;
+		}
 
 		for (String item : strs) {
 			intList.add(toLong(item));
@@ -60,13 +62,13 @@ public class Convert {
 	public static Date toDate(long num) {
 		return new Date(num);
 	}
-	
-	public static Boolean toBoolean(String bool){
-		Boolean result=null;
-		try{
+
+	public static Boolean toBoolean(String bool) {
+		Boolean result = null;
+		try {
 			result = Boolean.parseBoolean(bool);
-		}catch (Exception e) {
-			Logger.getRootLogger().info("error for toBoolean:"+e);
+		} catch (Exception e) {
+			Logger.getRootLogger().info("error for toBoolean:" + e);
 		}
 		return result;
 	}

@@ -88,10 +88,12 @@ public class LingShiMapperPlugin extends PluginAdapter {
 				XmlElement ifElement = new XmlElement("if");
 				ifElement.addAttribute(
 						new Attribute("test", columns.get(i).getActualColumnName().toLowerCase() + " != null"));
-				if (i != columns.size() - 1)
+				if (i != columns.size() - 1) {
 					ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + ","));
-				if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity()))
+				}
+				if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity())) {
 					ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + ""));
+				}
 				trimElement.addElement(ifElement);
 			}
 			element.addElement(trimElement);
@@ -107,12 +109,14 @@ public class LingShiMapperPlugin extends PluginAdapter {
 				XmlElement ifElement = new XmlElement("if");
 				ifElement.addAttribute(
 						new Attribute("test", columns.get(i).getActualColumnName().toLowerCase() + " != null"));
-				if (i != columns.size() - 1)
+				if (i != columns.size() - 1) {
 					ifElement.addElement(
 							new TextElement("#{" + columns.get(i).getActualColumnName().toLowerCase() + "},"));
-				if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity()))
+				}
+				if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity())) {
 					ifElement.addElement(
 							new TextElement("#{" + columns.get(i).getActualColumnName().toLowerCase() + "}"));
+				}
 				trimValueElement.addElement(ifElement);
 			}
 			element.addElement(trimValueElement);
@@ -140,12 +144,14 @@ public class LingShiMapperPlugin extends PluginAdapter {
 				XmlElement ifElement = new XmlElement("if");
 				ifElement.addAttribute(
 						new Attribute("test", columns.get(i).getActualColumnName().toLowerCase() + " != null"));
-				if (i != columns.size() - 1)
+				if (i != columns.size() - 1) {
 					ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + " = #{"
 							+ columns.get(i).getActualColumnName().toLowerCase() + "},"));
-				if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity()))
+				}
+				if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity())) {
 					ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + " = #{"
 							+ columns.get(i).getActualColumnName().toLowerCase() + "}"));
+				}
 				setElement.addElement(ifElement);
 			}
 		}
