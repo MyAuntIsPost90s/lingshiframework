@@ -36,8 +36,8 @@ public class LingShiTokenAndUserPool {
 					lock.lock();
 					Date date = new Date();
 					Logger.getRootLogger().info("BeginClearToken:" + date);
-					for(Entry<String, LingShiToken> entry :tokenandusers.entrySet()){
-						String key=entry.getKey();
+					for (Entry<String, LingShiToken> entry : tokenandusers.entrySet()) {
+						String key = entry.getKey();
 						if (tokenandusers.get(key).getExp().getTime() < date.getTime()) {
 							tokenandusers.remove(key);
 						}
@@ -150,12 +150,9 @@ public class LingShiTokenAndUserPool {
 		Map<String, LingShiToken> map = getTokenPool();
 		LingShiToken result = null;
 
-		lock.lock();
 		if (map.containsKey(token)) {
 			result = map.get(token);
 		}
-
-		lock.unlock();
 		return result;
 	}
 
@@ -166,12 +163,13 @@ public class LingShiTokenAndUserPool {
 	 */
 	public void removeTokenUser(String token) {
 		Map<String, LingShiToken> map = getTokenPool();
-
-		lock.lock();
 		if (map.containsKey(token)) {
-			map.remove(token);
+			lock.lock();
+			if (map.containsKey(token)) {
+				map.remove(token);
+			}
+			lock.unlock();
 		}
-		lock.unlock();
 	}
 
 	/**
@@ -185,20 +183,16 @@ public class LingShiTokenAndUserPool {
 	public int checkToken(String appkey, String token) {
 		Map<String, LingShiToken> map = getTokenPool();
 
-		lock.lock();
 		try {
 			Date date = new Date();
 			if (map.containsKey(token)) {
 				if (map.get(token).getExp().getTime() < date.getTime()) {
-					lock.unlock();
 					return LingShiTokenCode.EXP;
 				}
 				String key = EncryptHelper.EncoderByMd5(DESHelper.encode(appkey, map.get(token).getId())).toUpperCase();
 				if (!token.equals(key)) { // 校验失败
-					lock.unlock();
 					return LingShiTokenCode.FAIL;
 				}
-				lock.unlock();
 				return LingShiTokenCode.SUCCESS; // 校验成功
 			}
 		} catch (Exception e) {
@@ -206,7 +200,6 @@ public class LingShiTokenAndUserPool {
 		}
 
 		// 校验失败
-		lock.unlock();
 		return LingShiTokenCode.FAIL;
 	}
 }
