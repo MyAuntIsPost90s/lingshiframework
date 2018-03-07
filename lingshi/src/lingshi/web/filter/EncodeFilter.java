@@ -32,6 +32,6 @@ public class EncodeFilter implements javax.servlet.Filter {
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		this.charset = filterConfig.getInitParameter("charset");
-		Logger.getRootLogger().info("Load encoding:" + charset);
+		Logger.getRootLogger().info("Load encoding:%s" + charset);
 	}
 }

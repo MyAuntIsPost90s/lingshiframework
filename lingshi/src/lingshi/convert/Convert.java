@@ -68,7 +68,7 @@ public class Convert {
 		try {
 			result = Boolean.parseBoolean(bool);
 		} catch (Exception e) {
-			Logger.getRootLogger().info("error for toBoolean:" + e);
+			Logger.getRootLogger().info("error for toBoolean:" + e.getMessage());
 		}
 		return result;
 	}
