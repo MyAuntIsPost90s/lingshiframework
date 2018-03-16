@@ -6,8 +6,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
+import org.springframework.web.context.ContextLoader;
 
 import com.alibaba.fastjson.JSON;
+
+import lingshi.model.LingShiConfig;
+import lingshi.valid.StringValid;
 
 public class RequestHolder {
 	private HttpServletResponse response;
@@ -62,10 +66,15 @@ public class RequestHolder {
 	 */
 	public void setClientUser(Object user) throws Exception {
 		LingShiToken token = pool.addTokenUser(user);
+		LingShiConfig config = (LingShiConfig) ContextLoader.getCurrentWebApplicationContext()
+				.getBean(LingShiConfig.class);
 
 		Cookie cookie = new Cookie("LingShi_Token", token.getToken());
 		cookie.setMaxAge(60 * 60 * 24 * 15);
 		cookie.setPath("/");
+		if (!StringValid.isNullOrEmpty(config.getDomain())) {
+			cookie.setDomain(config.getDomain());
+		}
 		response.addCookie(cookie);
 		response.setHeader("AccessToken", token.getToken());
 	}
