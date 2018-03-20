@@ -6,14 +6,13 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.Logger;
-import org.springframework.web.context.ContextLoader;
 
-import lingshi.model.LingShiConfig;
 import lingshi.utilities.DESHelper;
 import lingshi.utilities.EncryptHelper;
 
@@ -48,6 +47,8 @@ public class LingShiTokenAndUserPool {
 			} catch (Exception e) {
 				// 打log
 				Logger.getRootLogger().error(e);
+			} finally {
+				lock.unlock();
 			}
 		}
 	};
@@ -95,32 +96,23 @@ public class LingShiTokenAndUserPool {
 	 * @return
 	 * @throws Exception
 	 */
-	public LingShiToken addTokenUser(Object user) {
+	public LingShiToken addTokenUser(Object user, String appKey) {
 		Map<String, LingShiToken> map = getTokenPool();
 
 		lock.lock();
 		try {
-			for (String key : map.keySet()) {
-				// 已经存在池中。刷新时间
-				if (map.get(key).getData().equals(user)) {
-					Calendar calendar = new GregorianCalendar();
-					calendar.setTime(new Date());
-					calendar.add(Calendar.HOUR, 2);
-					map.get(key).setExp(calendar.getTime());
-					map.get(key).setData(user);
-
-					lock.unlock();
-					return map.get(key);
+			Set<Entry<String, LingShiToken>> entries = map.entrySet();
+			for (Entry<String, LingShiToken> entry : entries) {
+				if (entry.getValue().getData().equals(user)) {
+					map.remove(entry.getKey());
+					break;
 				}
 			}
 
 			// 不存在时签发token
 			LingShiToken token = new LingShiToken();
-			LingShiConfig config = (LingShiConfig) ContextLoader.getCurrentWebApplicationContext()
-					.getBean(LingShiConfig.class);
-
 			String id = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
-			String key = EncryptHelper.EncoderByMd5(DESHelper.encode(config.getAppKey(), id)).toUpperCase(); // 先通过appkey生成秘钥，再通过MD5加密
+			String key = EncryptHelper.EncoderByMd5(DESHelper.encode(appKey, id)).toUpperCase(); // 先通过appkey生成秘钥，再通过MD5加密
 			Calendar calendar = new GregorianCalendar();
 			calendar.setTime(new Date());
 			calendar.add(Calendar.HOUR, 2);
@@ -130,13 +122,43 @@ public class LingShiTokenAndUserPool {
 			token.setData(user);
 
 			tokenandusers.put(token.getToken(), token);
-
-			lock.unlock();
 			return token;
 		} catch (Exception e) {
 			Logger.getRootLogger().error(e);
+		} finally {
+			lock.unlock();
 		}
-		lock.unlock();
+		return null;
+	}
+
+	/**
+	 * 更新token
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public LingShiToken updateTokenUser(Object user) {
+		Map<String, LingShiToken> map = getTokenPool();
+
+		lock.lock();
+		try {
+			Set<Entry<String, LingShiToken>> entries = map.entrySet();
+			for (Entry<String, LingShiToken> entry : entries) {
+				if (entry.getValue().getData().equals(user)) {
+					LingShiToken token = entry.getValue();
+					Calendar calendar = new GregorianCalendar();
+					calendar.setTime(new Date());
+					calendar.add(Calendar.HOUR, 2);
+					token.setExp(calendar.getTime());
+					token.setData(user);
+					return token;
+				}
+			}
+		} catch (Exception e) {
+			Logger.getRootLogger().error(e);
+		} finally {
+			lock.unlock();
+		}
 		return null;
 	}
 

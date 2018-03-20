@@ -19,12 +19,14 @@ public class RequestHolder {
 	private HttpSession session;
 	private String token;
 	private RequestFile requestFile;
+	private LingShiConfig config;
 	private static LingShiTokenAndUserPool pool;
 
 	private RequestHolder(HttpServletRequest request, HttpServletResponse response) {
 		this.response = response;
 		this.request = request;
 		this.session = request.getSession();
+		this.config = (LingShiConfig) ContextLoader.getCurrentWebApplicationContext().getBean(LingShiConfig.class);
 		pool = LingShiTokenAndUserPool.getLingShiTokenAndUserPool();
 
 		this.token = request.getHeader("AccessToken");
@@ -65,9 +67,15 @@ public class RequestHolder {
 	 * @throws Exception
 	 */
 	public void setClientUser(Object user) throws Exception {
-		LingShiToken token = pool.addTokenUser(user);
-		LingShiConfig config = (LingShiConfig) ContextLoader.getCurrentWebApplicationContext()
-				.getBean(LingShiConfig.class);
+		LingShiToken token = null;
+		if (config.getUseSSO() == true) { // 判断是否启用了单点登陆
+			token = pool.addTokenUser(user, config.getAppKey());
+		} else {
+			token = pool.updateTokenUser(user);
+		}
+		if(token==null){	//当不存在时需要执行添加
+			token = pool.addTokenUser(user, config.getAppKey());
+		}
 
 		Cookie cookie = new Cookie("LingShi_Token", token.getToken());
 		cookie.setMaxAge(60 * 60 * 24 * 15);
