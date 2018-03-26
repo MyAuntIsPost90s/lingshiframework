@@ -66,13 +66,35 @@ public class RequestHolder {
 	 * 
 	 * @throws Exception
 	 */
-	public void setClientUser(Object user) throws Exception {
+	public void addClientUser(Object user) throws Exception {
 		LingShiToken token = null;
 		if (config.getUseSSO() == true) { // 判断是否启用了单点登陆
 			token = pool.addTokenUser(user, config.getAppKey());
 		} else {
 			token = pool.updateTokenUser(user);
 		}
+		if(token==null){	//当不存在时需要执行添加
+			token = pool.addTokenUser(user, config.getAppKey());
+		}
+
+		Cookie cookie = new Cookie("LingShi_Token", token.getToken());
+		cookie.setMaxAge(60 * 60 * 24 * 15);
+		cookie.setPath("/");
+		if (!StringValid.isNullOrEmpty(config.getDomain())) {
+			cookie.setDomain(config.getDomain());
+		}
+		response.addCookie(cookie);
+		response.setHeader("AccessToken", token.getToken());
+	}
+	
+	/**
+	 * 修改token中的User
+	 * 
+	 * @param user
+	 * @throws Exception
+	 */
+	public void updateClientUser(Object user)throws Exception{
+		LingShiToken token = pool.updateTokenUser(user);
 		if(token==null){	//当不存在时需要执行添加
 			token = pool.addTokenUser(user, config.getAppKey());
 		}
