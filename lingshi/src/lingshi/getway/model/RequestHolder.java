@@ -1,4 +1,4 @@
-package lingshi.web.model;
+package lingshi.getway.model;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -6,10 +6,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-import org.springframework.web.context.ContextLoader;
 
 import com.alibaba.fastjson.JSON;
 
+import lingshi.getway.factory.TokenPoolFactory;
+import lingshi.getway.token.model.UserToken;
+import lingshi.getway.token.service.TokenMgrService;
+import lingshi.getway.token.service.TokenPoolBase;
+import lingshi.getway.token.service.impl.TokenMgrServiceMd5Impl;
 import lingshi.model.LingShiConfig;
 import lingshi.valid.StringValid;
 
@@ -20,14 +24,14 @@ public class RequestHolder {
 	private String token;
 	private RequestFile requestFile;
 	private LingShiConfig config;
-	private static LingShiTokenAndUserPool pool;
+	private static TokenPoolBase pool;
 
 	private RequestHolder(HttpServletRequest request, HttpServletResponse response) {
 		this.response = response;
 		this.request = request;
 		this.session = request.getSession();
-		this.config = (LingShiConfig) ContextLoader.getCurrentWebApplicationContext().getBean(LingShiConfig.class);
-		pool = LingShiTokenAndUserPool.getLingShiTokenAndUserPool();
+		this.config = LingShiConfig.getInstance();
+		pool = TokenPoolFactory.getTokenPool();
 
 		this.token = request.getHeader("AccessToken");
 	}
@@ -67,53 +71,55 @@ public class RequestHolder {
 	 * @throws Exception
 	 */
 	public void addClientUser(Object user) throws Exception {
-		LingShiToken token = null;
+		UserToken userToken = null;
 		if (config.getUseSSO() == true) { // 判断是否启用了单点登陆
-			token = pool.addTokenUser(user, config.getAppKey());
+			TokenMgrService tokenMgrService = new TokenMgrServiceMd5Impl();
+			String newToken = tokenMgrService.createTokenStr(config.getAppKey());
+			userToken = new UserToken();
+			userToken.setToken(newToken);
+			userToken.setData(user);
+			pool.add(userToken);
 		} else {
-			token = pool.updateTokenUser(user);
-		}
-		if(token==null){	//当不存在时需要执行添加
-			token = pool.addTokenUser(user, config.getAppKey());
+			userToken = (UserToken) pool.get(token);
+			pool.update(userToken);
 		}
 
-		Cookie cookie = new Cookie("LingShi_Token", token.getToken());
+		Cookie cookie = new Cookie("LingShi_Token", userToken.getToken());
 		cookie.setMaxAge(60 * 60 * 24 * 15);
 		cookie.setPath("/");
 		if (!StringValid.isNullOrEmpty(config.getDomain())) {
 			cookie.setDomain(config.getDomain());
 		}
 		response.addCookie(cookie);
-		response.setHeader("AccessToken", token.getToken());
+		response.setHeader("AccessToken", userToken.getToken());
 	}
-	
+
 	/**
 	 * 修改token中的User
 	 * 
 	 * @param user
 	 * @throws Exception
 	 */
-	public void updateClientUser(Object user)throws Exception{
-		LingShiToken token = pool.updateTokenUser(user);
-		if(token==null){	//当不存在时需要执行添加
-			token = pool.addTokenUser(user, config.getAppKey());
-		}
+	public void updateClientUser(Object user) throws Exception {
+		UserToken userToken = (UserToken) pool.get(token);
+		userToken.setData(user);
+		pool.update(userToken);
 
-		Cookie cookie = new Cookie("LingShi_Token", token.getToken());
+		Cookie cookie = new Cookie("LingShi_Token", userToken.getToken());
 		cookie.setMaxAge(60 * 60 * 24 * 15);
 		cookie.setPath("/");
 		if (!StringValid.isNullOrEmpty(config.getDomain())) {
 			cookie.setDomain(config.getDomain());
 		}
 		response.addCookie(cookie);
-		response.setHeader("AccessToken", token.getToken());
+		response.setHeader("AccessToken", userToken.getToken());
 	}
 
 	/**
 	 * 移除登陆用户
 	 */
 	public void removeClientUser() {
-		pool.removeTokenUser(token);
+		pool.delete(token);
 	}
 
 	/**
@@ -123,7 +129,7 @@ public class RequestHolder {
 	 * @throws Exception
 	 */
 	public Object getClientUser() {
-		LingShiToken result = pool.getToken(token);
+		UserToken result = (UserToken) pool.get(token);
 		return result == null ? null : result.getData();
 	}
 

@@ -1,4 +1,4 @@
-package lingshi.web.model;
+package lingshi.getway.model;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,8 +35,9 @@ public class RequestFile {
 	 */
 	public MultipartFile getFile() {
 		Iterator<String> filenames = mRequest.getFileNames();
-		if (filenames.hasNext())
+		if (filenames.hasNext()) {
 			return mRequest.getFile(filenames.next());
+		}
 		return null;
 	}
 

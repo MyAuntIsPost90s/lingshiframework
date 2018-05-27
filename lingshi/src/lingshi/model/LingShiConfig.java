@@ -1,5 +1,7 @@
 package lingshi.model;
 
+import org.springframework.web.context.ContextLoader;
+
 public class LingShiConfig {
 	private static String appKey;
 	private static String domain;
@@ -20,12 +22,16 @@ public class LingShiConfig {
 	public void setDomain(String domain) {
 		LingShiConfig.domain = domain;
 	}
-	
-	public boolean getUseSSO(){
+
+	public boolean getUseSSO() {
 		return useSSO;
 	}
-	
-	public void setUseSSO(boolean useSSO){
+
+	public void setUseSSO(boolean useSSO) {
 		LingShiConfig.useSSO = useSSO;
+	}
+
+	public static LingShiConfig getInstance() {
+		return (LingShiConfig) ContextLoader.getCurrentWebApplicationContext().getBean(LingShiConfig.class);
 	}
 }

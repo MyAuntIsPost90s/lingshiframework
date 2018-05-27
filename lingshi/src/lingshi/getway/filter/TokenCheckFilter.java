@@ -1,4 +1,4 @@
-package lingshi.web.filter;
+package lingshi.getway.filter;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -17,11 +17,13 @@ import org.apache.log4j.Logger;
 import com.alibaba.fastjson.JSON;
 
 import lingshi.convert.Convert;
+import lingshi.getway.model.MsgCode;
+import lingshi.getway.model.ResponseData;
+import lingshi.getway.token.LingShiTokenEnum.TokenStatus;
+import lingshi.getway.token.service.TokenMgrService;
+import lingshi.getway.token.service.impl.TokenMgrServiceMd5Impl;
+import lingshi.model.LingShiConfig;
 import lingshi.valid.StringValid;
-import lingshi.web.model.LingShiTokenAndUserPool;
-import lingshi.web.model.LingShiTokenCode;
-import lingshi.web.model.MsgCode;
-import lingshi.web.model.ResponseData;
 
 public class TokenCheckFilter implements javax.servlet.Filter {
 	private List<String> allowpath;
@@ -71,24 +73,24 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 		String token = hRequest.getHeader("AccessToken");
 
 		ResponseData responseData = new ResponseData();
-		if (StringValid.isNullOrEmpty(appKey)) {
-			responseData.fail("Token错误，非法请求", null, MsgCode.TOKEN_FAIL);
+		if (StringValid.isNullOrEmpty(appKey) || !appKey.equals(LingShiConfig.getInstance().getAppKey())) {
+			responseData.fail("appKey错误，非法请求", null, MsgCode.TOKEN_FAIL);
 			response.setContentType(response.getContentType().replace("text/html", "application/json"));
 			response.getWriter().write(JSON.toJSONString(responseData));
 			response.getWriter().close();
 			return;
 		}
 
-		LingShiTokenAndUserPool pool = LingShiTokenAndUserPool.getLingShiTokenAndUserPool();
-		int code = pool.checkToken(appKey, token);
-		if (code == LingShiTokenCode.FAIL) {
+		TokenMgrService tokenMgrService = new TokenMgrServiceMd5Impl();
+		TokenStatus tokenStatus = tokenMgrService.tokenCheck(token);
+		if (tokenStatus == TokenStatus.FAIL) {
 			responseData.fail("Token错误，非法请求", null, MsgCode.TOKEN_FAIL);
 			response.setContentType(response.getContentType().replace("text/html", "application/json"));
 			response.getWriter().write(JSON.toJSONString(responseData));
 			response.getWriter().close();
 			return;
 		}
-		if (code == LingShiTokenCode.EXP) {
+		if (tokenStatus == TokenStatus.EXP) {
 			responseData.fail("Token已过期", null, MsgCode.TOKEN_FAIL);
 			response.setContentType(response.getContentType().replace("text/html", "application/json"));
 			response.getWriter().write(JSON.toJSONString(responseData));
