@@ -1,5 +1,7 @@
 package lingshi.getway.model;
 
+import java.util.Date;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -78,10 +80,21 @@ public class RequestHolder {
 			userToken = new UserToken();
 			userToken.setToken(newToken);
 			userToken.setData(user);
+			userToken.setExp(new Date());
 			pool.add(userToken);
 		} else {
 			userToken = (UserToken) pool.get(token);
-			pool.update(userToken);
+			if (userToken == null) {
+				TokenMgrService tokenMgrService = new TokenMgrServiceMd5Impl();
+				String newToken = tokenMgrService.createTokenStr(config.getAppKey());
+				userToken = new UserToken();
+				userToken.setToken(newToken);
+				userToken.setData(user);
+				userToken.setExp(new Date());
+				pool.add(userToken);
+			} else {
+				pool.update(userToken);
+			}
 		}
 
 		Cookie cookie = new Cookie("LingShi_Token", userToken.getToken());
