@@ -2,9 +2,7 @@ package lingshi.utilities;
 
 import java.lang.reflect.Field;
 
-import org.apache.log4j.Logger;
-
-public class ObjectHelper {
+public class ObjectUtil {
 	public static <T> T setObjectNull(T t) {
 		Field[] fields = t.getClass().getFields();
 		Field logField = null;
@@ -15,7 +13,7 @@ public class ObjectHelper {
 				field.set(t, null);
 			}
 		} catch (Exception e) {
-			Logger.getRootLogger().info("set null error for" + logField.getName() + ":" + e.getMessage());
+			System.out.println("set null error for" + logField.getName() + ":" + e.getMessage());
 		}
 		return t;
 	}

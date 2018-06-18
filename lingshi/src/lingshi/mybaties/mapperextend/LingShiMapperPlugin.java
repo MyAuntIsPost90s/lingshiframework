@@ -72,56 +72,70 @@ public class LingShiMapperPlugin extends PluginAdapter {
 		element.addAttribute(new Attribute("id", "insert"));
 		element.addAttribute(new Attribute("parameterType", introspectedTable.getBaseRecordType()));
 		element.addElement(new TextElement("insert into " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
-
 		List<IntrospectedColumn> columns = introspectedTable.getAllColumns();
 		if (columns != null && columns.size() > 0) {
-			// 添加要插入的字段
-			XmlElement trimElement = new XmlElement("trim");
-			trimElement.addAttribute(new Attribute("prefix", "("));
-			trimElement.addAttribute(new Attribute("suffix", ")"));
-			trimElement.addAttribute(new Attribute("suffixOverrides", ","));
-
-			for (int i = 0; i < columns.size(); i++) {
-				if (columns.get(i).isIdentity()) {
-					continue;
-				}
-				XmlElement ifElement = new XmlElement("if");
-				ifElement.addAttribute(
-						new Attribute("test", columns.get(i).getActualColumnName().toLowerCase() + " != null"));
-				if (i != columns.size() - 1) {
-					ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + ","));
-				}
-				if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity())) {
-					ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + ""));
-				}
-				trimElement.addElement(ifElement);
-			}
-			element.addElement(trimElement);
-
-			XmlElement trimValueElement = new XmlElement("trim");
-			trimValueElement.addAttribute(new Attribute("prefix", "values("));
-			trimValueElement.addAttribute(new Attribute("suffix", ")"));
-			trimValueElement.addAttribute(new Attribute("suffixOverrides", ","));
-			for (int i = 0; i < columns.size(); i++) {
-				if (columns.get(i).isIdentity()) {
-					continue;
-				}
-				XmlElement ifElement = new XmlElement("if");
-				ifElement.addAttribute(
-						new Attribute("test", columns.get(i).getActualColumnName().toLowerCase() + " != null"));
-				if (i != columns.size() - 1) {
-					ifElement.addElement(
-							new TextElement("#{" + columns.get(i).getActualColumnName().toLowerCase() + "},"));
-				}
-				if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity())) {
-					ifElement.addElement(
-							new TextElement("#{" + columns.get(i).getActualColumnName().toLowerCase() + "}"));
-				}
-				trimValueElement.addElement(ifElement);
-			}
-			element.addElement(trimValueElement);
+			XmlElement insertFieldElement = getInsertField(columns);
+			element.addElement(insertFieldElement);
+			XmlElement insertValueElement = getInsertValue(columns);
+			element.addElement(insertValueElement);
 		}
 		return element;
+	}
+
+	/**
+	 * 获取insert字段
+	 * 
+	 * @param trimElement
+	 * @param columns
+	 */
+	private XmlElement getInsertField(List<IntrospectedColumn> columns) {
+		XmlElement trimElement = new XmlElement("trim");
+		trimElement.addAttribute(new Attribute("prefix", "("));
+		trimElement.addAttribute(new Attribute("suffix", ")"));
+		trimElement.addAttribute(new Attribute("suffixOverrides", ","));
+		for (int i = 0; i < columns.size(); i++) {
+			if (columns.get(i).isIdentity()) {
+				continue;
+			}
+			XmlElement ifElement = new XmlElement("if");
+			ifElement.addAttribute(new Attribute("test", columns.get(i).getJavaProperty() + " != null"));
+			if (i != columns.size() - 1) {
+				ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + ","));
+			}
+			if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity())) {
+				ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + ""));
+			}
+			trimElement.addElement(ifElement);
+		}
+		return trimElement;
+	}
+
+	/**
+	 * 获取要插入的值
+	 * 
+	 * @param trimValueElement
+	 * @param columns
+	 */
+	private XmlElement getInsertValue(List<IntrospectedColumn> columns) {
+		XmlElement trimValueElement = new XmlElement("trim");
+		trimValueElement.addAttribute(new Attribute("prefix", "values("));
+		trimValueElement.addAttribute(new Attribute("suffix", ")"));
+		trimValueElement.addAttribute(new Attribute("suffixOverrides", ","));
+		for (int i = 0; i < columns.size(); i++) {
+			if (columns.get(i).isIdentity()) {
+				continue;
+			}
+			XmlElement ifElement = new XmlElement("if");
+			ifElement.addAttribute(new Attribute("test", columns.get(i).getJavaProperty() + " != null"));
+			if (i != columns.size() - 1) {
+				ifElement.addElement(new TextElement("#{" + columns.get(i).getJavaProperty() + "},"));
+			}
+			if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity())) {
+				ifElement.addElement(new TextElement("#{" + columns.get(i).getJavaProperty() + "}"));
+			}
+			trimValueElement.addElement(ifElement);
+		}
+		return trimValueElement;
 	}
 
 	/**
@@ -135,40 +149,55 @@ public class LingShiMapperPlugin extends PluginAdapter {
 		element.addAttribute(new Attribute("id", "update"));
 		element.addAttribute(new Attribute("parameterType", introspectedTable.getBaseRecordType()));
 		element.addElement(new TextElement("update " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
-
-		XmlElement setElement = new XmlElement("set");
 		List<IntrospectedColumn> columns = introspectedTable.getBaseColumns();
+		XmlElement setElement = getUpdateSet(columns);
+		element.addElement(setElement);
+		columns = introspectedTable.getPrimaryKeyColumns();
+		fillUpdateWhere(element, columns);
+		return element;
+	}
+
+	/**
+	 * 填充要修改的值
+	 * 
+	 * @param trimValueElement
+	 * @param columns
+	 */
+	private XmlElement getUpdateSet(List<IntrospectedColumn> columns) {
+		XmlElement setElement = new XmlElement("set");
 		if (columns != null && columns.size() > 0) {
 			// 添加要插入的字段
 			for (int i = 0; i < columns.size(); i++) {
 				XmlElement ifElement = new XmlElement("if");
-				ifElement.addAttribute(
-						new Attribute("test", columns.get(i).getActualColumnName().toLowerCase() + " != null"));
+				ifElement.addAttribute(new Attribute("test", columns.get(i).getJavaProperty() + " != null"));
 				if (i != columns.size() - 1) {
-					ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + " = #{"
-							+ columns.get(i).getActualColumnName().toLowerCase() + "},"));
+					ifElement.addElement(new TextElement(
+							columns.get(i).getActualColumnName() + " = #{" + columns.get(i).getJavaProperty() + "},"));
 				}
 				if (i == columns.size() - 1 || (i == columns.size() - 2 && columns.get(i + 1).isIdentity())) {
-					ifElement.addElement(new TextElement(columns.get(i).getActualColumnName() + " = #{"
-							+ columns.get(i).getActualColumnName().toLowerCase() + "}"));
+					ifElement.addElement(new TextElement(
+							columns.get(i).getActualColumnName() + " = #{" + columns.get(i).getJavaProperty() + "}"));
 				}
 				setElement.addElement(ifElement);
 			}
 		}
-		element.addElement(setElement);
+		return setElement;
+	}
 
-		// 添加where
+	/**
+	 * 填充Update的where部分
+	 * 
+	 * @param element
+	 * @param columns
+	 */
+	private void fillUpdateWhere(XmlElement element, List<IntrospectedColumn> columns) {
 		element.addElement(new TextElement("where"));
-		columns = introspectedTable.getPrimaryKeyColumns();
 		if (columns != null && columns.size() > 0) {
-			// 添加要插入的字段
 			for (int i = 0; i < columns.size(); i++) {
-				element.addElement(new TextElement(columns.get(i).getActualColumnName() + " = #{"
-						+ columns.get(i).getActualColumnName().toLowerCase() + "}"));
+				element.addElement(new TextElement(
+						columns.get(i).getActualColumnName() + " = #{" + columns.get(i).getJavaProperty() + "}"));
 			}
 		}
-
-		return element;
 	}
 
 	/**
@@ -189,9 +218,9 @@ public class LingShiMapperPlugin extends PluginAdapter {
 			element.addElement(new TextElement("where 1=1"));
 			for (IntrospectedColumn column : columns) {
 				XmlElement ifElement = new XmlElement("if");
-				ifElement.addAttribute(new Attribute("test", column.getActualColumnName().toLowerCase() + " != null"));
-				ifElement.addElement(new TextElement("and " + column.getActualColumnName() + " = #{"
-						+ column.getActualColumnName().toLowerCase() + "}"));
+				ifElement.addAttribute(new Attribute("test", column.getJavaProperty() + " != null"));
+				ifElement.addElement(new TextElement(
+						"and " + column.getActualColumnName() + " = #{" + column.getJavaProperty() + "}"));
 				element.addElement(ifElement);
 			}
 		}
@@ -212,19 +241,8 @@ public class LingShiMapperPlugin extends PluginAdapter {
 		element.addAttribute(new Attribute("parameterType", introspectedTable.getBaseRecordType()));
 		element.addElement(
 				new TextElement("select count(*) from " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
-
 		List<IntrospectedColumn> columns = introspectedTable.getAllColumns();
-		if (columns != null && columns.size() > 0) {
-			element.addElement(new TextElement("where 1=1"));
-			for (IntrospectedColumn column : columns) {
-				XmlElement ifElement = new XmlElement("if");
-				ifElement.addAttribute(new Attribute("test", column.getActualColumnName().toLowerCase() + " != null"));
-				ifElement.addElement(new TextElement("and " + column.getActualColumnName() + " = #{"
-						+ column.getActualColumnName().toLowerCase() + "}"));
-				element.addElement(ifElement);
-			}
-		}
-
+		fillGetListWhere(element, columns);
 		return element;
 	}
 
@@ -240,20 +258,28 @@ public class LingShiMapperPlugin extends PluginAdapter {
 		element.addAttribute(new Attribute("resultType", introspectedTable.getBaseRecordType()));
 		element.addAttribute(new Attribute("parameterType", introspectedTable.getBaseRecordType()));
 		element.addElement(new TextElement("select * from " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
-
 		List<IntrospectedColumn> columns = introspectedTable.getAllColumns();
+		fillGetListWhere(element, columns);
+		return element;
+	}
+
+	/**
+	 * 填充获取列表的where部分
+	 * 
+	 * @param element
+	 * @param columns
+	 */
+	private void fillGetListWhere(XmlElement element, List<IntrospectedColumn> columns) {
 		if (columns != null && columns.size() > 0) {
 			element.addElement(new TextElement("where 1=1"));
 			for (IntrospectedColumn column : columns) {
 				XmlElement ifElement = new XmlElement("if");
-				ifElement.addAttribute(new Attribute("test", column.getActualColumnName().toLowerCase() + " != null"));
-				ifElement.addElement(new TextElement("and " + column.getActualColumnName() + " = #{"
-						+ column.getActualColumnName().toLowerCase() + "}"));
+				ifElement.addAttribute(new Attribute("test", column.getJavaProperty() + " != null"));
+				ifElement.addElement(new TextElement(
+						"and " + column.getActualColumnName() + " = #{" + column.getJavaProperty() + "}"));
 				element.addElement(ifElement);
 			}
 		}
-
-		return element;
 	}
 
 	/**
@@ -267,16 +293,13 @@ public class LingShiMapperPlugin extends PluginAdapter {
 		element.addAttribute(new Attribute("id", "getSingle"));
 		element.addAttribute(new Attribute("resultType", introspectedTable.getBaseRecordType()));
 		element.addElement(new TextElement("select * from " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
-
 		List<IntrospectedColumn> columns = introspectedTable.getPrimaryKeyColumns();
 		if (columns != null && columns.size() > 0) {
 			IntrospectedColumn column = columns.get(0);
 			element.addElement(new TextElement("where " + column.getActualColumnName() + " = #{id}"));
 		}
-
 		// 添加分页
 		element.addElement(new TextElement("limit 0,1"));
-
 		return element;
 	}
 
@@ -290,8 +313,18 @@ public class LingShiMapperPlugin extends PluginAdapter {
 		XmlElement element = new XmlElement("delete");
 		element.addAttribute(new Attribute("id", "batchDelete"));
 		element.addElement(new TextElement("delete from " + introspectedTable.getFullyQualifiedTableNameAtRuntime()));
-
 		List<IntrospectedColumn> columns = introspectedTable.getPrimaryKeyColumns();
+		fillBatchDeleteWhere(element, columns);
+		return element;
+	}
+
+	/**
+	 * 填充批量删除的where部分
+	 * 
+	 * @param element
+	 * @param columns
+	 */
+	private void fillBatchDeleteWhere(XmlElement element, List<IntrospectedColumn> columns) {
 		if (columns != null && columns.size() > 0) {
 			element.addElement(new TextElement("where " + columns.get(0).getActualColumnName() + " in("));
 			XmlElement foreachElement = new XmlElement("foreach");
@@ -299,13 +332,9 @@ public class LingShiMapperPlugin extends PluginAdapter {
 			foreachElement.addAttribute(new Attribute("collection", "list"));
 			foreachElement.addAttribute(new Attribute("separator", ","));
 			foreachElement.addElement(new TextElement("#{item}"));
-
 			element.addElement(foreachElement);
-
 			element.addElement(new TextElement(")"));
 		}
-
-		return element;
 	}
 
 	public boolean validate(List<String> arg0) {

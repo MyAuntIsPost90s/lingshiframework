@@ -10,7 +10,7 @@ import javax.crypto.spec.IvParameterSpec;
 
 import org.apache.commons.codec.binary.Base64;
 
-public class DESHelper {
+public class DESUtil {
 	public static final String ALGORITHM_DES = "DES/CBC/PKCS5Padding";
 
 	/**

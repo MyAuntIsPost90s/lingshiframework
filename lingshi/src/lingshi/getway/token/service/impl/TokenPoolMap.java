@@ -11,8 +11,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.Set;
 import java.util.Timer;
 
-import org.apache.log4j.Logger;
-
 import lingshi.getway.token.model.TokenBase;
 import lingshi.getway.token.model.UserToken;
 import lingshi.getway.token.service.TokenPoolBase;
@@ -80,7 +78,7 @@ public class TokenPoolMap extends TokenPoolBase {
 			lock.lock();
 			pool.remove(token);
 		} catch (Exception e) {
-			Logger.getRootLogger().error(e.getMessage(), e);
+			e.printStackTrace();
 		} finally {
 			lock.unlock();
 		}
@@ -98,7 +96,7 @@ public class TokenPoolMap extends TokenPoolBase {
 				}
 			}
 		} catch (Exception e) {
-			Logger.getRootLogger().error(e.getMessage(), e);
+			e.printStackTrace();
 		} finally {
 			lock.unlock();
 		}

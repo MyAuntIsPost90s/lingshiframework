@@ -12,8 +12,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
 import com.alibaba.fastjson.JSON;
 
 import lingshi.convert.Convert;
@@ -105,11 +103,11 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 		String[] strs = filterConfig.getInitParameter("allowpath").split(",");
 		this.allowpath = Arrays.asList(strs);
-		Logger.getRootLogger().info("Load allowpath:" + allowpath.toString());
+		System.out.println("Load allowpath:" + allowpath.toString());
 
 		// 是否开启跨域
 		String crossStr = filterConfig.getInitParameter("iscross");
 		iscross = Convert.toBoolean(crossStr);
-		Logger.getRootLogger().info("Load iscross:" + iscross);
+		System.out.println("Load iscross:" + iscross);
 	}
 }

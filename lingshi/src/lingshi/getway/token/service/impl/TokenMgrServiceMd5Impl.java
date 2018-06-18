@@ -3,14 +3,12 @@ package lingshi.getway.token.service.impl;
 import java.util.Date;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
-
 import lingshi.getway.token.LingShiTokenEnum.TokenStatus;
 import lingshi.getway.token.model.TokenBase;
 import lingshi.getway.token.service.TokenMgrService;
 import lingshi.getway.token.service.TokenPoolBase;
-import lingshi.utilities.DESHelper;
-import lingshi.utilities.EncryptHelper;
+import lingshi.utilities.DESUtil;
+import lingshi.utilities.EncryptUtil;
 
 public class TokenMgrServiceMd5Impl implements TokenMgrService {
 
@@ -32,9 +30,9 @@ public class TokenMgrServiceMd5Impl implements TokenMgrService {
 		String token = null;
 		try {
 			String id = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
-			token = EncryptHelper.EncoderByMd5(DESHelper.encode(appKey, id)).toUpperCase();
+			token = EncryptUtil.EncoderByMd5(DESUtil.encode(appKey, id)).toUpperCase();
 		} catch (Exception e) {
-			Logger.getRootLogger().error(e.getMessage(), e);
+			e.printStackTrace();
 		}
 		return token;
 	}

@@ -8,15 +8,12 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.apache.log4j.Logger;
-
 public class EncodeFilter implements javax.servlet.Filter {
 	private String charset;
 
 	@Override
 	public void destroy() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -32,6 +29,6 @@ public class EncodeFilter implements javax.servlet.Filter {
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
 		this.charset = filterConfig.getInitParameter("charset");
-		Logger.getRootLogger().info("Load encoding:%s" + charset);
+		System.out.println("Load encoding:%s" + charset);
 	}
 }

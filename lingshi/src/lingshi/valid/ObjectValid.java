@@ -1,8 +1,7 @@
 package lingshi.valid;
 
 import java.lang.reflect.Field;
-
-import org.apache.log4j.Logger;
+import java.util.Collection;
 
 public class ObjectValid {
 
@@ -34,7 +33,7 @@ public class ObjectValid {
 				}
 			}
 		} catch (Exception e) {
-			Logger.getRootLogger().info(e);
+			e.printStackTrace();
 		}
 		return true;
 	}
@@ -45,7 +44,7 @@ public class ObjectValid {
 	 * @param obj
 	 * @return
 	 */
-	public static boolean isNull(Object obj) {
+	public static boolean isEmpty(Object obj) {
 		Field[] fields = obj.getClass().getFields();
 		try {
 			for (Field field : fields) {
@@ -55,8 +54,29 @@ public class ObjectValid {
 				}
 			}
 		} catch (Exception e) {
-			Logger.getRootLogger().info(e);
+			e.printStackTrace();
 		}
 		return true;
 	}
+
+	public static boolean isEmpty(Collection<?> list) {
+		return list == null || list.isEmpty();
+	}
+
+	public static boolean isNull(Object obj) {
+		return obj == null;
+	}
+
+	public static boolean isNotNull(Object obj) {
+		return !isNull(obj);
+	}
+
+	public static boolean isNotEmpty(Object obj) {
+		return !isEmpty(obj);
+	}
+
+	public static boolean isNotEmpty(Collection<?> list) {
+		return isEmpty(list);
+	}
+
 }

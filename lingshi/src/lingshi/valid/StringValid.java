@@ -17,6 +17,10 @@ public class StringValid {
 		return false;
 	}
 
+	public static boolean isNotNullOrEmpty(String str) {
+		return !isNotNullOrEmpty(str);
+	}
+
 	public static boolean isNullOrWhiteSpace(String str) {
 		if (str == null) {
 			return true;
@@ -26,5 +30,9 @@ public class StringValid {
 			return true;
 		}
 		return false;
+	}
+
+	public static boolean isNotNullOrWhiteSpace(String str) {
+		return isNullOrWhiteSpace(str);
 	}
 }

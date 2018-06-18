@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.log4j.Logger;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -68,7 +67,7 @@ public class RequestFile {
 				}
 			}
 		} catch (Exception e) {
-			Logger.getRootLogger().info(e);
+			e.printStackTrace();
 		}
 		return count;
 	}
