@@ -1,4 +1,4 @@
-package lingshi.getway.model;
+package lingshi.gateway.model;
 
 /**
  * 返回码

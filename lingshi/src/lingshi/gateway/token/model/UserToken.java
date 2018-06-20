@@ -1,4 +1,4 @@
-package lingshi.getway.token.model;
+package lingshi.gateway.token.model;
 
 public class UserToken extends TokenBase {
 	private Object data;

@@ -1,6 +1,6 @@
-package lingshi.getway.token.service;
+package lingshi.gateway.token.service;
 
-import lingshi.getway.token.model.TokenBase;
+import lingshi.gateway.token.model.TokenBase;
 
 /**
  * 抽象Token池

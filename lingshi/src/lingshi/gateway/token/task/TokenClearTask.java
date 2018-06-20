@@ -1,8 +1,8 @@
-package lingshi.getway.token.task;
+package lingshi.gateway.token.task;
 
 import java.util.TimerTask;
 
-import lingshi.getway.token.service.impl.TokenPoolMap;
+import lingshi.gateway.token.service.impl.TokenPoolMap;
 import lingshi.utilities.DateUtil;
 
 /**

@@ -1,4 +1,4 @@
-package lingshi.getway.token;
+package lingshi.gateway.token;
 
 /**
  * Token枚举类

@@ -1,4 +1,4 @@
-package lingshi.getway.token.model;
+package lingshi.gateway.token.model;
 
 import java.util.Date;
 

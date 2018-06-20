@@ -1,4 +1,4 @@
-package lingshi.getway.model;
+package lingshi.gateway.model;
 
 import java.util.Date;
 
@@ -10,11 +10,12 @@ import javax.servlet.http.HttpSession;
 
 import com.alibaba.fastjson.JSON;
 
-import lingshi.getway.factory.TokenPoolFactory;
-import lingshi.getway.token.model.UserToken;
-import lingshi.getway.token.service.TokenMgrService;
-import lingshi.getway.token.service.TokenPoolBase;
-import lingshi.getway.token.service.impl.TokenMgrServiceMd5Impl;
+import lingshi.gateway.GatewayConstant;
+import lingshi.gateway.factory.TokenPoolFactory;
+import lingshi.gateway.token.model.UserToken;
+import lingshi.gateway.token.service.TokenMgrService;
+import lingshi.gateway.token.service.TokenPoolBase;
+import lingshi.gateway.token.service.impl.TokenMgrServiceMd5Impl;
 import lingshi.model.LingShiConfig;
 import lingshi.valid.StringValid;
 
@@ -33,8 +34,7 @@ public class RequestHolder {
 		this.session = request.getSession();
 		this.config = LingShiConfig.getInstance();
 		pool = TokenPoolFactory.getTokenPool();
-
-		this.token = request.getHeader("AccessToken");
+		this.token = getToken(request);
 	}
 
 	public static RequestHolder get(HttpServletRequest request, HttpServletResponse response) {
@@ -117,14 +117,14 @@ public class RequestHolder {
 		userToken.setData(user);
 		pool.update(userToken);
 
-		Cookie cookie = new Cookie("LingShi_Token", userToken.getToken());
+		Cookie cookie = new Cookie(GatewayConstant.LINGSHI_COOKIE_TOKEN, userToken.getToken());
 		cookie.setMaxAge(60 * 60 * 24 * 15);
 		cookie.setPath("/");
 		if (!StringValid.isNullOrEmpty(config.getDomain())) {
 			cookie.setDomain(config.getDomain());
 		}
 		response.addCookie(cookie);
-		response.setHeader("AccessToken", userToken.getToken());
+		response.setHeader(GatewayConstant.ACCESSTOKEN, userToken.getToken());
 	}
 
 	/**
@@ -229,5 +229,13 @@ public class RequestHolder {
 		}
 		ServletContext servletContext = this.request.getServletContext();
 		return servletContext.getRealPath("/") + path;
+	}
+
+	private String getToken(HttpServletRequest request) {
+		String token = request.getHeader("AccessToken");
+		if (StringValid.isNullOrEmpty(token)) {
+			token = request.getParameter("AccessToken");
+		}
+		return token;
 	}
 }

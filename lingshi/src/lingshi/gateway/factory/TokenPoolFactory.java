@@ -1,10 +1,10 @@
-package lingshi.getway.factory;
+package lingshi.gateway.factory;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import lingshi.getway.token.service.TokenPoolBase;
-import lingshi.getway.token.service.impl.TokenPoolMap;
+import lingshi.gateway.token.service.TokenPoolBase;
+import lingshi.gateway.token.service.impl.TokenPoolMap;
 
 /**
  * Token池工厂

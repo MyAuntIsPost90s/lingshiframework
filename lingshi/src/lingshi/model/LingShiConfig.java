@@ -2,10 +2,14 @@ package lingshi.model;
 
 import org.springframework.web.context.ContextLoader;
 
+import lingshi.gateway.GatewayConstant;
+import lingshi.valid.ObjectValid;
+
 public class LingShiConfig {
 	private static String appKey;
 	private static String domain;
 	private static boolean useSSO;
+	private static Integer tokenExp;
 
 	public String getAppKey() {
 		return appKey;
@@ -29,6 +33,17 @@ public class LingShiConfig {
 
 	public void setUseSSO(boolean useSSO) {
 		LingShiConfig.useSSO = useSSO;
+	}
+
+	public Integer getTokenExp() {
+		if (ObjectValid.isNull(tokenExp)) {
+			tokenExp = GatewayConstant.TOKEN_DEFAULT_EXP;
+		}
+		return tokenExp;
+	}
+
+	public void setTokenExp(Integer tokenExp) {
+		LingShiConfig.tokenExp = tokenExp;
 	}
 
 	public static LingShiConfig getInstance() {

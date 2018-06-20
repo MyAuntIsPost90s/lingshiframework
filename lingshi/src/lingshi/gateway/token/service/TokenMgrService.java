@@ -1,6 +1,6 @@
-package lingshi.getway.token.service;
+package lingshi.gateway.token.service;
 
-import lingshi.getway.token.LingShiTokenEnum.TokenStatus;
+import lingshi.gateway.token.LingShiTokenEnum.TokenStatus;
 
 public interface TokenMgrService {
 

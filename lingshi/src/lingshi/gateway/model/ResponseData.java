@@ -1,4 +1,4 @@
-package lingshi.getway.model;
+package lingshi.gateway.model;
 
 public class ResponseData {
 	private int code; // 返回码

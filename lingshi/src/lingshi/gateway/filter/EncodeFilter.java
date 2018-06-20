@@ -1,4 +1,4 @@
-package lingshi.getway.filter;
+package lingshi.gateway.filter;
 
 import java.io.IOException;
 
@@ -10,10 +10,10 @@ import javax.servlet.ServletResponse;
 
 public class EncodeFilter implements javax.servlet.Filter {
 	private String charset;
+	private final String CHARSET = "charset";
 
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class EncodeFilter implements javax.servlet.Filter {
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		this.charset = filterConfig.getInitParameter("charset");
+		this.charset = filterConfig.getInitParameter(CHARSET);
 		System.out.println("Load encoding:%s" + charset);
 	}
 }

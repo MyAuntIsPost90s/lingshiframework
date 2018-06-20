@@ -1,4 +1,4 @@
-package lingshi.getway.token.service.impl;
+package lingshi.gateway.token.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,16 +11,18 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.Set;
 import java.util.Timer;
 
-import lingshi.getway.token.model.TokenBase;
-import lingshi.getway.token.model.UserToken;
-import lingshi.getway.token.service.TokenPoolBase;
-import lingshi.getway.token.task.TokenClearTask;
+import lingshi.gateway.token.model.TokenBase;
+import lingshi.gateway.token.model.UserToken;
+import lingshi.gateway.token.service.TokenPoolBase;
+import lingshi.gateway.token.task.TokenClearTask;
+import lingshi.model.LingShiConfig;
 import lingshi.utilities.DateUtil;
 
 public class TokenPoolMap extends TokenPoolBase {
 
 	protected static Map<String, TokenBase> pool = new HashMap<String, TokenBase>();
 	protected static Lock lock = new ReentrantLock();
+
 	private static TokenPoolMap tokenPool = null;
 
 	private TokenPoolMap() {
@@ -31,8 +33,7 @@ public class TokenPoolMap extends TokenPoolBase {
 			try {
 				lock.lock();
 				tokenPool = new TokenPoolMap();
-				int hour = 60 * 1000 * 60 * 2; // 定义两个小时清理一次
-				new Timer().schedule(new TokenClearTask(), 0, hour);
+				new Timer().schedule(new TokenClearTask(), 0, LingShiConfig.getInstance().getTokenExp());
 			} finally {
 				lock.unlock();
 			}
@@ -60,7 +61,7 @@ public class TokenPoolMap extends TokenPoolBase {
 		if (pool.containsKey(baseToken.getToken())) {
 			update(baseToken);
 		} else {
-			baseToken.setExp(DateUtil.addHour(2));
+			baseToken.setExp(DateUtil.addMilliSecond(LingShiConfig.getInstance().getTokenExp()));
 			pool.put(baseToken.getToken(), baseToken);
 		}
 	}
@@ -68,7 +69,7 @@ public class TokenPoolMap extends TokenPoolBase {
 	@Override
 	public void update(TokenBase baseToken) {
 		delete(baseToken.getToken());
-		baseToken.setExp(DateUtil.addHour(2));
+		baseToken.setExp(DateUtil.addMilliSecond(LingShiConfig.getInstance().getTokenExp()));
 		add(baseToken);
 	}
 

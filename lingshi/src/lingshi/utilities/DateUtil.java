@@ -101,4 +101,15 @@ public class DateUtil {
 		calendar.add(Calendar.SECOND, second);
 		return calendar.getTime();
 	}
+
+	public static Date addMilliSecond(int millisecond) {
+		return addMilliSecond(new Date(), millisecond);
+	}
+
+	public static Date addMilliSecond(Date date, int millisecond) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(Calendar.MILLISECOND, millisecond);
+		return calendar.getTime();
+	}
 }

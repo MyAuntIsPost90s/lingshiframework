@@ -1,12 +1,12 @@
-package lingshi.getway.token.service.impl;
+package lingshi.gateway.token.service.impl;
 
 import java.util.Date;
 import java.util.UUID;
 
-import lingshi.getway.token.LingShiTokenEnum.TokenStatus;
-import lingshi.getway.token.model.TokenBase;
-import lingshi.getway.token.service.TokenMgrService;
-import lingshi.getway.token.service.TokenPoolBase;
+import lingshi.gateway.token.LingShiTokenEnum.TokenStatus;
+import lingshi.gateway.token.model.TokenBase;
+import lingshi.gateway.token.service.TokenMgrService;
+import lingshi.gateway.token.service.TokenPoolBase;
 import lingshi.utilities.DESUtil;
 import lingshi.utilities.EncryptUtil;
 
