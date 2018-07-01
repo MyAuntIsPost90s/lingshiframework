@@ -56,7 +56,7 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 				return;
 			}
 		}
-		String url = hRequest.getRequestURL().toString();
+		String url = getUri(hRequest);
 		if (isAllowPath(url)) {
 			chain.doFilter(request, response);
 			return;
@@ -124,7 +124,7 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 			return true;
 		}
 		for (String path : checkPath) {
-			if (url.contains(path)) {
+			if (url.equals(path)) {
 				return true;
 			}
 		}
@@ -134,12 +134,21 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 	private boolean isAllowPath(String url) {
 		if (allowPath != null) {
 			for (String item : allowPath) {
-				if (url.contains(item)) {
+				if (url.equals(item)) {
 					return true;
 				}
 			}
 		}
 		return false;
+	}
+
+	private String getUri(HttpServletRequest request) {
+		String webName = request.getServletContext().getContextPath();
+		String url = request.getRequestURI();
+		if (StringValid.isNotNullOrEmpty(webName)) {
+			url = url.replaceAll(webName, "");
+		}
+		return url;
 	}
 
 	@Override
