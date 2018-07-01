@@ -33,6 +33,6 @@ public class StringValid {
 	}
 
 	public static boolean isNotNullOrWhiteSpace(String str) {
-		return isNullOrWhiteSpace(str);
+		return !isNullOrWhiteSpace(str);
 	}
 }

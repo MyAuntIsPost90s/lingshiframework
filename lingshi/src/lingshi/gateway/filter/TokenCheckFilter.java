@@ -1,6 +1,7 @@
 package lingshi.gateway.filter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,6 +28,7 @@ import lingshi.gateway.token.service.impl.TokenMgrServiceMd5Impl;
 import lingshi.model.LingShiConfig;
 import lingshi.utilities.DateUtil;
 import lingshi.valid.ObjectValid;
+import lingshi.valid.StringValid;
 
 public class TokenCheckFilter implements javax.servlet.Filter {
 	private List<String> allowPath; // 允许通过的路径
@@ -149,20 +151,35 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 	}
 
 	private void initCheckPath(FilterConfig filterConfig) {
-		String[] strs = filterConfig.getInitParameter(CHECK_PATH).split(",");
-		this.checkPath = Arrays.asList(strs);
-		System.out.println("Load checkPath:" + checkPath.toString());
+		String checkPath = filterConfig.getInitParameter(CHECK_PATH);
+		if (StringValid.isNotNullOrWhiteSpace(checkPath)) {
+			String[] strs = checkPath.split(",");
+			this.checkPath = Arrays.asList(strs);
+			System.out.println("Load checkPath:" + checkPath.toString());
+		} else {
+			this.checkPath = new ArrayList<String>();
+		}
 	}
 
 	private void initAllowPath(FilterConfig filterConfig) {
-		String[] strs = filterConfig.getInitParameter(ALLOW_PATH).split(",");
-		this.allowPath = Arrays.asList(strs);
-		System.out.println("Load allowPath:" + allowPath.toString());
+		String allowPath = filterConfig.getInitParameter(ALLOW_PATH);
+		if (StringValid.isNotNullOrWhiteSpace(allowPath)) {
+			String[] strs = allowPath.split(",");
+			this.allowPath = Arrays.asList(strs);
+			System.out.println("Load allowPath:" + allowPath.toString());
+		} else {
+			this.allowPath = new ArrayList<String>();
+		}
 	}
 
 	private void initIsCross(FilterConfig filterConfig) {
 		String crossStr = filterConfig.getInitParameter(IS_CROSS);
-		this.isCross = Convert.toBoolean(crossStr);
-		System.out.println("Load isCross:" + isCross);
+		if (StringValid.isNotNullOrWhiteSpace(crossStr)) {
+			this.isCross = Convert.toBoolean(crossStr);
+			System.out.println("Load isCross:" + isCross);
+		} else {
+			this.isCross = false;
+			System.out.println("Load isCross: false");
+		}
 	}
 }
