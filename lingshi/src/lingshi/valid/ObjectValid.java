@@ -76,7 +76,7 @@ public class ObjectValid {
 	}
 
 	public static boolean isNotEmpty(Collection<?> list) {
-		return isEmpty(list);
+		return !isEmpty(list);
 	}
 
 }
