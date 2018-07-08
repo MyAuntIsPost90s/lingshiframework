@@ -2,6 +2,7 @@ package lingshi.gateway.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -25,6 +26,16 @@ public class RequestFile {
 	 */
 	public List<MultipartFile> getFiles(String name) {
 		return mRequest.getFiles(name);
+	}
+
+	public List<MultipartFile> getFiles() {
+		List<MultipartFile> files = new ArrayList<MultipartFile>();
+		if (isNotEmpty()) {
+			for (MultipartFile file : mRequest.getFileMap().values()) {
+				files.add(file);
+			}
+		}
+		return files;
 	}
 
 	/**
@@ -79,6 +90,10 @@ public class RequestFile {
 	 */
 	public boolean isEmpty() {
 		return getFileCount() < 1;
+	}
+
+	public boolean isNotEmpty() {
+		return !isEmpty();
 	}
 
 	/**

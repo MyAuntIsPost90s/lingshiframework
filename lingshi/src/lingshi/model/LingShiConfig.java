@@ -1,8 +1,7 @@
 package lingshi.model;
 
-import org.springframework.web.context.ContextLoader;
-
 import lingshi.gateway.GatewayConstant;
+import lingshi.utilities.SpringUtil;
 import lingshi.valid.ObjectValid;
 
 public class LingShiConfig {
@@ -47,6 +46,6 @@ public class LingShiConfig {
 	}
 
 	public static LingShiConfig getInstance() {
-		return (LingShiConfig) ContextLoader.getCurrentWebApplicationContext().getBean(LingShiConfig.class);
+		return SpringUtil.getBean(LingShiConfig.class);
 	}
 }

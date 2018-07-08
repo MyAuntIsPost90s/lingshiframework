@@ -167,8 +167,11 @@ public class RequestHolder {
 		try {
 			String json = JSON.toJSONString(responseData);
 			System.out.println("return json : " + json);
-
-			response.setContentType(response.getContentType().replace("text/html", "application/json"));
+			if(StringValid.isNullOrEmpty(response.getContentType())){
+				response.setContentType("application/json");
+			}else{
+				response.setContentType(response.getContentType().replace("text/html", "application/json"));
+			}
 			response.getWriter().write(json);
 			response.getWriter().close();
 		} catch (Exception e) {
@@ -198,7 +201,11 @@ public class RequestHolder {
 		try {
 			String json = JSON.toJSONString(responseData);
 			System.out.println("return json : " + json);
-			response.setContentType(response.getContentType().replace("text/html", "application/json"));
+			if(StringValid.isNullOrEmpty(response.getContentType())){
+				response.setContentType("application/json");
+			}else{
+				response.setContentType(response.getContentType().replace("text/html", "application/json"));
+			}
 			response.getWriter().write(json);
 			response.getWriter().close();
 		} catch (Exception e) {
@@ -210,7 +217,11 @@ public class RequestHolder {
 		try {
 			String json = JSON.toJSONString(object);
 			System.out.println("return json : " + json);
-			response.setContentType(response.getContentType().replace("text/html", "application/json"));
+			if(StringValid.isNullOrEmpty(response.getContentType())){
+				response.setContentType("application/json");
+			}else{
+				response.setContentType(response.getContentType().replace("text/html", "application/json"));
+			}
 			response.getWriter().write(json);
 			response.getWriter().close();
 		} catch (Exception e) {
