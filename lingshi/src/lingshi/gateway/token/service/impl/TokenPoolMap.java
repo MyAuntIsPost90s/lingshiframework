@@ -28,15 +28,10 @@ public class TokenPoolMap extends TokenPoolBase {
 	private TokenPoolMap() {
 	}
 
-	public static TokenPoolMap get() {
+	public static synchronized TokenPoolMap get() {
 		if (tokenPool == null) {
-			try {
-				lock.lock();
-				tokenPool = new TokenPoolMap();
-				new Timer().schedule(new TokenClearTask(), 0, LingShiConfig.getInstance().getTokenExp());
-			} finally {
-				lock.unlock();
-			}
+			tokenPool = new TokenPoolMap();
+			new Timer().schedule(new TokenClearTask(), 0, LingShiConfig.getInstance().getTokenExp());
 		}
 		return tokenPool;
 	}
