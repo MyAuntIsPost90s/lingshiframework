@@ -38,7 +38,12 @@ public class TokenPoolMap extends TokenPoolBase {
 
 	@Override
 	public TokenBase get(String token) {
-		return pool.get(token);
+		try {
+			lock.lock();
+			return pool.get(token);
+		} finally {
+			pool.get(token);
+		}
 	}
 
 	@Override
