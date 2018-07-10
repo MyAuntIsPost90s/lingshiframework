@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.Set;
 import java.util.Timer;
 
@@ -21,7 +19,6 @@ import lingshi.utilities.DateUtil;
 public class TokenPoolMap extends TokenPoolBase {
 
 	protected static Map<String, TokenBase> pool = new HashMap<String, TokenBase>();
-	protected static Lock lock = new ReentrantLock();
 
 	private static TokenPoolMap tokenPool = null;
 
@@ -38,31 +35,32 @@ public class TokenPoolMap extends TokenPoolBase {
 
 	@Override
 	public TokenBase get(String token) {
-		try {
-			lock.lock();
+		synchronized (TokenPoolMap.class) {
 			return pool.get(token);
-		} finally {
-			pool.get(token);
 		}
 	}
 
 	@Override
 	public void add(TokenBase baseToken) {
-		// add之前判断重复
-		Map<String, TokenBase> map = pool;
-		UserToken userToken = (UserToken) baseToken;
-		Set<Entry<String, TokenBase>> entries = map.entrySet();
-		for (Entry<String, TokenBase> entry : entries) {
-			UserToken item = (UserToken) entry.getValue();
-			if (item.getData().equals(userToken.getData())) {
-				delete(item.getToken());
+		synchronized (TokenPoolMap.class) {
+			// add之前判断重复
+			Map<String, TokenBase> map = pool;
+			UserToken userToken = (UserToken) baseToken;
+			Set<Entry<String, TokenBase>> entries = map.entrySet();
+			for (Entry<String, TokenBase> entry : entries) {
+				UserToken item = (UserToken) entry.getValue();
+				if (item.getData().equals(userToken.getData())) {
+					delete(item.getToken());
+				}
 			}
 		}
 		if (pool.containsKey(baseToken.getToken())) {
 			update(baseToken);
 		} else {
-			baseToken.setExp(DateUtil.addMilliSecond(LingShiConfig.getInstance().getTokenExp()));
-			pool.put(baseToken.getToken(), baseToken);
+			synchronized (TokenPoolMap.class) {
+				baseToken.setExp(DateUtil.addMilliSecond(LingShiConfig.getInstance().getTokenExp()));
+				pool.put(baseToken.getToken(), baseToken);
+			}
 		}
 	}
 
@@ -75,31 +73,21 @@ public class TokenPoolMap extends TokenPoolBase {
 
 	@Override
 	public void delete(String token) {
-		try {
-			lock.lock();
+		synchronized (TokenPoolMap.class) {
 			pool.remove(token);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			lock.unlock();
 		}
 	}
 
 	public void clearExp() {
 		List<String> removes = new ArrayList<String>();
 		Date date = new Date();
-		try {
-			lock.lock();
+		synchronized (TokenPoolMap.class) {
 			Set<Entry<String, TokenBase>> entries = pool.entrySet();
 			for (Entry<String, TokenBase> entry : entries) {
 				if (date.after(entry.getValue().getExp())) {
 					removes.add(entry.getKey());
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			lock.unlock();
 		}
 		for (String string : removes) {
 			delete(string);

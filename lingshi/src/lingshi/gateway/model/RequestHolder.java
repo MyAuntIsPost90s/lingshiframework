@@ -71,7 +71,7 @@ public class RequestHolder {
 	 * 
 	 * @throws Exception
 	 */
-	public void addClientUser(Object user) throws Exception {
+	public String addClientUser(Object user) throws Exception {
 		UserToken userToken = null;
 		if (config.getUseSSO() == true) { // 判断是否启用了单点登陆
 			TokenMgrService tokenMgrService = new TokenMgrServiceMd5Impl();
@@ -96,14 +96,15 @@ public class RequestHolder {
 			}
 		}
 
-		Cookie cookie = new Cookie("LingShi_Token", userToken.getToken());
+		Cookie cookie = new Cookie(GatewayConstant.LINGSHI_COOKIE_TOKEN, userToken.getToken());
 		cookie.setMaxAge(60 * 60 * 24 * 15);
 		cookie.setPath("/");
 		if (!StringValid.isNullOrEmpty(config.getDomain())) {
 			cookie.setDomain(config.getDomain());
 		}
 		response.addCookie(cookie);
-		response.setHeader("AccessToken", userToken.getToken());
+		response.setHeader(GatewayConstant.ACCESSTOKEN, userToken.getToken());
+		return userToken.getToken();
 	}
 
 	/**
