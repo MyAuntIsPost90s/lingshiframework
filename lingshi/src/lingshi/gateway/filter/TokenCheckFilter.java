@@ -83,7 +83,7 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 		String appKey = GatewayConstant.getCurrAppKey(request);
 		String accessToken = GatewayConstant.getCurrAccessToken(request);
 		ResponseData responseData = new ResponseData();
-		if (LingShiConfig.getInstance().getAppKey().equals(appKey)) {
+		if (!LingShiConfig.getInstance().getAppKey().equals(appKey)) {
 			responseData.fail("appKey错误，非法请求", null, MsgCode.TOKEN_FAIL);
 			response.setContentType(response.getContentType().replace("text/html", "application/json"));
 			response.getWriter().write(JSON.toJSONString(responseData));
