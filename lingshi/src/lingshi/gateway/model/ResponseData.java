@@ -1,9 +1,13 @@
 package lingshi.gateway.model;
 
 public class ResponseData {
+	
 	private int code; // 返回码
+	
 	private String msg; // 返回信息
+	
 	private String msgcode; // 信息码
+	
 	private Object data; // 数据
 
 	public int getCode() {
