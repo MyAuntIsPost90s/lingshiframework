@@ -17,16 +17,12 @@ import com.alibaba.fastjson.JSON;
 
 import lingshi.convert.Convert;
 import lingshi.gateway.GatewayConstant;
-import lingshi.gateway.factory.TokenPoolFactory;
 import lingshi.gateway.model.MsgCode;
 import lingshi.gateway.model.ResponseData;
 import lingshi.gateway.token.LingShiTokenEnum.TokenStatus;
-import lingshi.gateway.token.model.TokenBase;
-import lingshi.gateway.token.service.TokenMgrService;
-import lingshi.gateway.token.service.TokenPoolBase;
-import lingshi.gateway.token.service.impl.TokenMgrServiceMd5Impl;
+import lingshi.gateway.token.strategy.TokenContext;
+import lingshi.gateway.token.strategy.TokenContextFactory;
 import lingshi.model.LingShiConfig;
-import lingshi.utilities.DateUtil;
 import lingshi.valid.ObjectValid;
 import lingshi.valid.StringValid;
 
@@ -73,10 +69,8 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 
 	private void refreshTokenExp(HttpServletRequest request) {
 		String accessToken = GatewayConstant.getCurrAccessToken(request);
-		TokenPoolBase pool = TokenPoolFactory.getTokenPool();
-		TokenBase tokenBase = pool.get(accessToken);
-		int exp = LingShiConfig.getInstance().getTokenExp();
-		tokenBase.setExp(DateUtil.addMilliSecond(exp));
+		TokenContext tokenContext = TokenContextFactory.getTokenContext();
+		tokenContext.refreshExp(accessToken);
 	}
 
 	private boolean checkPass(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -90,8 +84,8 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 			response.getWriter().close();
 			return false;
 		}
-		TokenMgrService tokenMgrService = new TokenMgrServiceMd5Impl();
-		TokenStatus tokenStatus = tokenMgrService.tokenCheck(accessToken);
+		TokenContext tokenContext = TokenContextFactory.getTokenContext();
+		TokenStatus tokenStatus = tokenContext.check(accessToken);
 		if (tokenStatus == TokenStatus.FAIL) {
 			responseData.fail("Token错误，非法请求", null, MsgCode.TOKEN_FAIL);
 			response.setContentType(response.getContentType().replace("text/html", "application/json"));

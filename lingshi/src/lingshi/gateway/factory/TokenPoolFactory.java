@@ -1,8 +1,5 @@
 package lingshi.gateway.factory;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import lingshi.gateway.token.service.TokenPoolBase;
 import lingshi.gateway.token.service.impl.TokenPoolMap;
 
@@ -13,18 +10,10 @@ import lingshi.gateway.token.service.impl.TokenPoolMap;
 public class TokenPoolFactory {
 
 	private static TokenPoolBase tokenPool;
-	private static Lock lock = new ReentrantLock();
 
-	public static TokenPoolBase getTokenPool() {
+	public static synchronized TokenPoolBase getTokenPool() {
 		if (TokenPoolFactory.tokenPool == null) {
-			lock.lock();
-			try {
-				if (TokenPoolFactory.tokenPool == null) {
-					tokenPool = TokenPoolMap.get();
-				}
-			} finally {
-				lock.unlock();
-			}
+			tokenPool = TokenPoolMap.get();
 		}
 		return tokenPool;
 	}

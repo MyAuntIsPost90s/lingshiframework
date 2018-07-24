@@ -1,7 +1,5 @@
 package lingshi.gateway.model;
 
-import java.util.Date;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -11,11 +9,9 @@ import javax.servlet.http.HttpSession;
 import com.alibaba.fastjson.JSON;
 
 import lingshi.gateway.GatewayConstant;
-import lingshi.gateway.factory.TokenPoolFactory;
-import lingshi.gateway.token.model.UserToken;
-import lingshi.gateway.token.service.TokenMgrService;
-import lingshi.gateway.token.service.TokenPoolBase;
-import lingshi.gateway.token.service.impl.TokenMgrServiceMd5Impl;
+import lingshi.gateway.token.model.TokenBase;
+import lingshi.gateway.token.strategy.TokenContext;
+import lingshi.gateway.token.strategy.TokenContextFactory;
 import lingshi.model.LingShiConfig;
 import lingshi.valid.StringValid;
 
@@ -26,15 +22,15 @@ public class RequestHolder {
 	private String token;
 	private RequestFile requestFile;
 	private LingShiConfig config;
-	private static TokenPoolBase pool;
+	private TokenContext tokenContext;
 
 	private RequestHolder(HttpServletRequest request, HttpServletResponse response) {
 		this.response = response;
 		this.request = request;
 		this.session = request.getSession();
 		this.config = LingShiConfig.getInstance();
-		pool = TokenPoolFactory.getTokenPool();
-		this.token = getToken(request);
+		this.token = GatewayConstant.getCurrAccessToken(request);
+		this.tokenContext = TokenContextFactory.getTokenContext();
 	}
 
 	public static RequestHolder get(HttpServletRequest request, HttpServletResponse response) {
@@ -72,39 +68,14 @@ public class RequestHolder {
 	 * @throws Exception
 	 */
 	public String addClientUser(Object user) throws Exception {
-		UserToken userToken = null;
-		if (config.getUseSSO() == true) { // 判断是否启用了单点登陆
-			TokenMgrService tokenMgrService = new TokenMgrServiceMd5Impl();
-			String newToken = tokenMgrService.createTokenStr(config.getAppKey());
-			userToken = new UserToken();
-			userToken.setToken(newToken);
-			userToken.setData(user);
-			userToken.setExp(new Date());
-			pool.add(userToken);
+		if (config.getUseSSO() == true) { // 判断是否启用了单用户登陆
+			TokenBase tokenBase = tokenContext.create(user);
+			token = tokenBase.getToken();
 		} else {
-			userToken = (UserToken) pool.get(token);
-			if (userToken == null) {
-				TokenMgrService tokenMgrService = new TokenMgrServiceMd5Impl();
-				String newToken = tokenMgrService.createTokenStr(config.getAppKey());
-				userToken = new UserToken();
-				userToken.setToken(newToken);
-				userToken.setData(user);
-				userToken.setExp(new Date());
-				pool.add(userToken);
-			} else {
-				pool.update(userToken);
-			}
+			tokenContext.update(token, user);
 		}
-
-		Cookie cookie = new Cookie(GatewayConstant.LINGSHI_COOKIE_TOKEN, userToken.getToken());
-		cookie.setMaxAge(60 * 60 * 24 * 15);
-		cookie.setPath("/");
-		if (!StringValid.isNullOrEmpty(config.getDomain())) {
-			cookie.setDomain(config.getDomain());
-		}
-		response.addCookie(cookie);
-		response.setHeader(GatewayConstant.ACCESSTOKEN, userToken.getToken());
-		return userToken.getToken();
+		refreshCookie();
+		return token;
 	}
 
 	/**
@@ -114,25 +85,29 @@ public class RequestHolder {
 	 * @throws Exception
 	 */
 	public void updateClientUser(Object user) throws Exception {
-		UserToken userToken = (UserToken) pool.get(token);
-		userToken.setData(user);
-		pool.update(userToken);
+		tokenContext.update(token, user);
+		refreshCookie();
+	}
 
-		Cookie cookie = new Cookie(GatewayConstant.LINGSHI_COOKIE_TOKEN, userToken.getToken());
+	/**
+	 * 刷新cookie
+	 */
+	private void refreshCookie() {
+		Cookie cookie = new Cookie(GatewayConstant.LINGSHI_COOKIE_TOKEN, token);
 		cookie.setMaxAge(60 * 60 * 24 * 15);
 		cookie.setPath("/");
 		if (!StringValid.isNullOrEmpty(config.getDomain())) {
 			cookie.setDomain(config.getDomain());
 		}
 		response.addCookie(cookie);
-		response.setHeader(GatewayConstant.ACCESSTOKEN, userToken.getToken());
+		response.setHeader(GatewayConstant.ACCESSTOKEN, token);
 	}
 
 	/**
 	 * 移除登陆用户
 	 */
 	public void removeClientUser() {
-		pool.delete(token);
+		tokenContext.remove(token);
 	}
 
 	/**
@@ -142,8 +117,7 @@ public class RequestHolder {
 	 * @throws Exception
 	 */
 	public Object getClientUser() {
-		UserToken result = (UserToken) pool.get(token);
-		return result == null ? null : result.getData();
+		return tokenContext.getData(token);
 	}
 
 	public void fail(String msg) {
@@ -168,9 +142,9 @@ public class RequestHolder {
 		try {
 			String json = JSON.toJSONString(responseData);
 			System.out.println("return json : " + json);
-			if(StringValid.isNullOrEmpty(response.getContentType())){
+			if (StringValid.isNullOrEmpty(response.getContentType())) {
 				response.setContentType("application/json");
-			}else{
+			} else {
 				response.setContentType(response.getContentType().replace("text/html", "application/json"));
 			}
 			response.getWriter().write(json);
@@ -202,9 +176,9 @@ public class RequestHolder {
 		try {
 			String json = JSON.toJSONString(responseData);
 			System.out.println("return json : " + json);
-			if(StringValid.isNullOrEmpty(response.getContentType())){
+			if (StringValid.isNullOrEmpty(response.getContentType())) {
 				response.setContentType("application/json");
-			}else{
+			} else {
 				response.setContentType(response.getContentType().replace("text/html", "application/json"));
 			}
 			response.getWriter().write(json);
@@ -218,9 +192,9 @@ public class RequestHolder {
 		try {
 			String json = JSON.toJSONString(object);
 			System.out.println("return json : " + json);
-			if(StringValid.isNullOrEmpty(response.getContentType())){
+			if (StringValid.isNullOrEmpty(response.getContentType())) {
 				response.setContentType("application/json");
-			}else{
+			} else {
 				response.setContentType(response.getContentType().replace("text/html", "application/json"));
 			}
 			response.getWriter().write(json);
@@ -241,13 +215,5 @@ public class RequestHolder {
 		}
 		ServletContext servletContext = this.request.getServletContext();
 		return servletContext.getRealPath("/") + path;
-	}
-
-	private String getToken(HttpServletRequest request) {
-		String token = request.getHeader("AccessToken");
-		if (StringValid.isNullOrEmpty(token)) {
-			token = request.getParameter("AccessToken");
-		}
-		return token;
 	}
 }
