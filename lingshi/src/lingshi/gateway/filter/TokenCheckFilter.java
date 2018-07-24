@@ -1,9 +1,8 @@
 package lingshi.gateway.filter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -23,16 +22,13 @@ import lingshi.gateway.token.LingShiTokenEnum.TokenStatus;
 import lingshi.gateway.token.strategy.TokenContext;
 import lingshi.gateway.token.strategy.TokenContextFactory;
 import lingshi.model.LingShiConfig;
-import lingshi.valid.ObjectValid;
 import lingshi.valid.StringValid;
 
 public class TokenCheckFilter implements javax.servlet.Filter {
-	private List<String> allowPath; // 允许通过的路径
-	private List<String> checkPath; // 需要校验的路径
+	private HashSet<String> allowPath; // 允许通过的路径
 	private Boolean isCross; // 是否允许跨域
 
 	private final String ALLOW_PATH = "allowPath";
-	private final String CHECK_PATH = "checkPath";
 	private final String IS_CROSS = "isCross";
 
 	@Override
@@ -57,12 +53,10 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 			chain.doFilter(request, response);
 			return;
 		}
-		if (isNeedCheck(url)) {
-			if (!checkPass(hRequest, hResponse)) {
-				return;
-			} else {
-				refreshTokenExp(hRequest);
-			}
+		if (!checkPass(hRequest, hResponse)) {
+			return;
+		} else {
+			refreshTokenExp(hRequest);
 		}
 		chain.doFilter(request, response);
 	}
@@ -113,25 +107,9 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 		response.setHeader("XDomainRequestAllowed", "1");
 	}
 
-	private boolean isNeedCheck(String url) {
-		if (ObjectValid.isEmpty(this.checkPath)) {
-			return true;
-		}
-		for (String path : checkPath) {
-			if (url.equals(path)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	private boolean isAllowPath(String url) {
-		if (allowPath != null) {
-			for (String item : allowPath) {
-				if (url.equals(item)) {
-					return true;
-				}
-			}
+		if (allowPath != null && allowPath.contains(url)) {
+			return true;
 		}
 		return false;
 	}
@@ -147,31 +125,19 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		initCheckPath(filterConfig);
 		initAllowPath(filterConfig);
 		initIsCross(filterConfig);
 
-	}
-
-	private void initCheckPath(FilterConfig filterConfig) {
-		String checkPath = filterConfig.getInitParameter(CHECK_PATH);
-		if (StringValid.isNotNullOrWhiteSpace(checkPath)) {
-			String[] strs = checkPath.split(",");
-			this.checkPath = Arrays.asList(strs);
-			System.out.println("Load checkPath:" + checkPath.toString());
-		} else {
-			this.checkPath = new ArrayList<String>();
-		}
 	}
 
 	private void initAllowPath(FilterConfig filterConfig) {
 		String allowPath = filterConfig.getInitParameter(ALLOW_PATH);
 		if (StringValid.isNotNullOrWhiteSpace(allowPath)) {
 			String[] strs = allowPath.split(",");
-			this.allowPath = Arrays.asList(strs);
+			this.allowPath = new HashSet<String>(Arrays.asList(strs));
 			System.out.println("Load allowPath:" + allowPath.toString());
 		} else {
-			this.allowPath = new ArrayList<String>();
+			this.allowPath = new HashSet<String>();
 		}
 	}
 
