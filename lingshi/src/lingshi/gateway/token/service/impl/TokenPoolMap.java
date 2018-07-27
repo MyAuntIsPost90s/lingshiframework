@@ -51,6 +51,7 @@ public class TokenPoolMap extends TokenPoolBase {
 				UserToken item = (UserToken) entry.getValue();
 				if (item.getData().equals(userToken.getData())) {
 					delete(item.getToken());
+					break;
 				}
 			}
 		}
