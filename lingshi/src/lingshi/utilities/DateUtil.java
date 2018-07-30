@@ -112,4 +112,18 @@ public class DateUtil {
 		calendar.add(Calendar.MILLISECOND, millisecond);
 		return calendar.getTime();
 	}
+
+	public static Date parse(String dateStr, String pattern) {
+		try {
+			SimpleDateFormat formater = new SimpleDateFormat(pattern);
+			return formater.parse(dateStr);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static Date parse(String dateStr) {
+		return parse(dateStr, YYYYMMDDHHMMSSSpt);
+	}
 }
