@@ -9,6 +9,7 @@ public class LingShiConfig {
 	private static String domain;
 	private static boolean useSSO;
 	private static Integer tokenExp;
+	private static String tokenName;
 
 	public String getAppKey() {
 		return appKey;
@@ -41,6 +42,17 @@ public class LingShiConfig {
 		return tokenExp;
 	}
 
+	public String getTokenName() {
+		if (ObjectValid.isNull(tokenName)) {
+			tokenName = GatewayConstant.COOKIE_TOKEN_KEY;
+		}
+		return tokenName;
+	}
+
+	public void setTokenName(String tokenName) {
+		LingShiConfig.tokenName = tokenName;
+	}
+
 	public void setTokenExp(Integer tokenExp) {
 		LingShiConfig.tokenExp = tokenExp;
 	}
@@ -48,4 +60,5 @@ public class LingShiConfig {
 	public static LingShiConfig getInstance() {
 		return SpringUtil.getBean(LingShiConfig.class);
 	}
+
 }

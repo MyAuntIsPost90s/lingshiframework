@@ -10,7 +10,7 @@ public class GatewayConstant {
 
 	public final static String ACCESSTOKEN = "AccessToken";
 
-	public final static String LINGSHI_COOKIE_TOKEN = "LingShi_Token";
+	public final static String COOKIE_TOKEN_KEY = "LingShi_Token";
 
 	public final static int TOKEN_DEFAULT_EXP = 60 * 1000 * 60 * 2;
 

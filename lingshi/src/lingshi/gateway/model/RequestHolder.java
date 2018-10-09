@@ -93,7 +93,7 @@ public class RequestHolder {
 	 * 刷新cookie
 	 */
 	private void refreshCookie() {
-		Cookie cookie = new Cookie(GatewayConstant.LINGSHI_COOKIE_TOKEN, token);
+		Cookie cookie = new Cookie(config.getTokenName(), token);
 		cookie.setMaxAge(60 * 60 * 24 * 15);
 		cookie.setPath("/");
 		if (!StringValid.isNullOrEmpty(config.getDomain())) {
