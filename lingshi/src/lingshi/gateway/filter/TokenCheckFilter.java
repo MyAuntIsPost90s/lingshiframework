@@ -41,7 +41,7 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 		HttpServletRequest hRequest = (HttpServletRequest) request;
 		HttpServletResponse hResponse = (HttpServletResponse) response;
 		if (isCross) {
-			setCrossHeader(hResponse);
+			setCrossHeader(hRequest, hResponse);
 			boolean isOption = hRequest.getMethod().toUpperCase().equals("OPTIONS");
 			if (isOption) {
 				chain.doFilter(request, response);
@@ -97,8 +97,10 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 		return true;
 	}
 
-	private void setCrossHeader(HttpServletResponse response) {
-		response.setHeader("Access-Control-Allow-Origin", "*");
+	private void setCrossHeader(HttpServletRequest request, HttpServletResponse response) {
+		if (StringValid.isNotNullOrEmpty(request.getHeader("Origin"))) {
+			response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
+		}
 		response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
 		response.setHeader("Access-Control-Max-Age", "0");
 		response.setHeader("Access-Control-Allow-Headers",
