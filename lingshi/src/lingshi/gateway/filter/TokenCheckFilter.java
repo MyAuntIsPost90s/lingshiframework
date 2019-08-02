@@ -120,7 +120,7 @@ public class TokenCheckFilter implements javax.servlet.Filter {
 		String webName = request.getServletContext().getContextPath();
 		String url = request.getRequestURI();
 		if (StringValid.isNotNullOrEmpty(webName)) {
-			url = url.replaceAll(webName, "");
+			url = url.substring(url.indexOf(webName) + webName.length());
 		}
 		return url;
 	}
